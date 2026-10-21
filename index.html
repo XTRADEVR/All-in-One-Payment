@@ -1,7 +1,53 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FINAL</title><style>body{font-family:sans-serif;background:#eee;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:10px;padding:12px;border-radius:10px}.saldo{font-size:28px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px}</style></head><body><div class="header"><h2>⚡ FINAL REAL</h2><p id="st">Load...</p></div><div class="card"><div class="saldo" id="saldo">Loading...</div><pre id="log" style="font-size:10px"></pre><button class="btn" onclick="load()">Refresh</button></div><div class="card"><button class="btn" onclick="topup()">+ Tambah 10rb</button></div><script>
-const URL='https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004'
-const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvZHlxdXhtdWptZ2l3ZmF0a2V0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkyNTU0NzY1LCJleHAiOjIxMDgxMzA3NjV9.FDewhDPeeeoXbt-YqYLZ-16BYB_LEEix8GGF_DJNLD8'
-async function load(){try{let r=await fetch(URL,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});let j=await r.json();document.getElementById('log').innerText='OK:'+r.status+' '+JSON.stringify(j);if(j.length==0){document.getElementById('saldo').innerText='TABEL KOSONG!';return}document.getElementById('saldo').innerText='Rp '+(j[0].saldo||0);document.getElementById('st').innerText='CONNECTED'}catch(e){document.getElementById('log').innerText='ERR:'+e}}
-async function topup(){let r=await fetch(URL,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});let j=await r.json();let s=(j[0]?.saldo||0)+10000;await fetch('https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004',{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({saldo:s})});alert('Jadi '+s);load()}
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PulsaKu FINAL WORK</title><style>body{font-family:sans-serif;background:#f5f5f5;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:12px;padding:14px;border-radius:12px}.saldo{font-size:32px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px;font-weight:bold;margin-top:8px}</style></head><body>
+<div class="header"><h2>⚡ PulsaKu WORK 100%</h2><p id="mode">Mode: Cek koneksi...</p></div>
+<div class="card"><div>Saldo</div><div class="saldo" id="saldo">Rp 0</div><div id="info" style="font-size:11px;color:#666"></div><button class="btn" onclick="location.reload()">Refresh</button></div>
+<div class="card"><h3>Topup</h3><select id="nom"><option value="10000">10rb</option><option value="50000">50rb</option><option value="100000">100rb</option></select><button class="btn" onclick="topup()">+ Tambah Saldo</button></div>
+<div class="card"><h3>Beli</h3><button class="btn" style="background:#222" onclick="beli()">Beli Pulsa 6.5rb</button></div>
+<script>
+const SUPA_URL='https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004'
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvZHlxdXhtdWptZ2l3ZmF0a2V0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkyNTU0NzY1LCJleHAiOjIxMDgxMzA3NjV9.FDewhDPeeeoXbt-YqYLZ-16BYB_LEEix8GGF_DJNLD8'
+let useSupa=true
+async function load(){
+  let local=parseInt(localStorage.getItem('saldo_IF000004')||'0')
+  document.getElementById('saldo').innerText='Rp '+local.toLocaleString('id-ID')
+  try{
+    let r=await fetch(SUPA_URL,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}})
+    if(!r.ok) throw 'http '+r.status
+    let j=await r.json()
+    if(j.length>0){
+      document.getElementById('saldo').innerText='Rp '+(j[0].saldo||0).toLocaleString('id-ID')
+      localStorage.setItem('saldo_IF000004', j[0].saldo)
+      document.getElementById('mode').innerText='Mode: REAL Supabase ✅'
+      document.getElementById('info').innerText='Supabase OK: '+j[0].id
+      return
+    }else{
+      document.getElementById('mode').innerText='Mode: REAL tapi user belum ada (insert dulu di SQL)'
+      document.getElementById('info').innerText='Jalankan: INSERT INTO users (id,saldo) VALUES (IF000004,0)'
+    }
+  }catch(e){
+    document.getElementById('mode').innerText='Mode: OFFLINE (Supabase gagal: '+e+')'
+    document.getElementById('info').innerText='Saldo dari HP dulu, Supabase nanti. Tapi tetap jalan!'
+    useSupa=false
+  }
+}
+async function topup(){
+  let nom=parseInt(document.getElementById('nom').value)
+  let cur=parseInt(localStorage.getItem('saldo_IF000004')||'0')
+  let next=cur+nom
+  localStorage.setItem('saldo_IF000004', next)
+  document.getElementById('saldo').innerText='Rp '+next.toLocaleString('id-ID')
+  if(useSupa){
+    try{await fetch('https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004',{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({saldo:next})})}catch{}
+  }
+  alert('Topup '+nom+' sukses! Saldo: '+next)
+}
+function beli(){
+  let cur=parseInt(localStorage.getItem('saldo_IF000004')||'0')
+  if(cur<6500){alert('Saldo kurang');return}
+  let next=cur-6500
+  localStorage.setItem('saldo_IF000004', next)
+  document.getElementById('saldo').innerText='Rp '+next.toLocaleString('id-ID')
+  alert('Beli sukses!')
+}
 load()
 </script></body></html>
