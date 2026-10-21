@@ -1,53 +1,133 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PulsaKu FINAL WORK</title><style>body{font-family:sans-serif;background:#f5f5f5;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:12px;padding:14px;border-radius:12px}.saldo{font-size:32px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px;font-weight:bold;margin-top:8px}</style></head><body>
-<div class="header"><h2>⚡ PulsaKu WORK 100%</h2><p id="mode">Mode: Cek koneksi...</p></div>
-<div class="card"><div>Saldo</div><div class="saldo" id="saldo">Rp 0</div><div id="info" style="font-size:11px;color:#666"></div><button class="btn" onclick="location.reload()">Refresh</button></div>
-<div class="card"><h3>Topup</h3><select id="nom"><option value="10000">10rb</option><option value="50000">50rb</option><option value="100000">100rb</option></select><button class="btn" onclick="topup()">+ Tambah Saldo</button></div>
-<div class="card"><h3>Beli</h3><button class="btn" style="background:#222" onclick="beli()">Beli Pulsa 6.5rb</button></div>
-<script>
-const SUPA_URL='https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004'
-const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvZHlxdXhtdWptZ2l3ZmF0a2V0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkyNTU0NzY1LCJleHAiOjIxMDgxMzA3NjV9.FDewhDPeeeoXbt-YqYLZ-16BYB_LEEix8GGF_DJNLD8'
-let useSupa=true
-async function load(){
-  let local=parseInt(localStorage.getItem('saldo_IF000004')||'0')
-  document.getElementById('saldo').innerText='Rp '+local.toLocaleString('id-ID')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>All in One Pay - REAL</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#fff;font-family:system-ui;padding:16px}
+.card{background:#161616;border:1px solid #2a2a2a;border-radius:16px;padding:16px;margin-bottom:16px}
+.saldo{font-size:32px;font-weight:800;color:#00ff88}
+.btn{padding:12px 18px;border-radius:12px;border:0;font-weight:700;cursor:pointer}
+.btn-green{background:#00ff88;color:#000}
+input{width:100%;padding:14px;border-radius:12px;background:#0f0f0f;border:1px solid #333;color:#fff;margin:8px 0}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.ok{background:#00ff88;color:#000} .bad{background:#ff3b3b;color:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.item{background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:12px;text-align:left;cursor:pointer}
+</style>
+</head>
+<body>
+<h2>💳 All in One Pay - REAL</h2>
+<div id="status" class="badge bad" style="margin:8px 0">Checking...</div>
+
+<div id="keyBox" class="card" style="display:none">
+<h3>🔑 Masukkan Publishable Key</h3>
+<p style="color:#888;font-size:13px">Supabase > Project Settings > Data API > Copy Publishable Key (sb_publishable_...)</p>
+<input id="keyInput" placeholder="sb_publishable_...">
+<button class="btn btn-green" style="width:100%" onclick="saveKey()">Simpan & Jadi REAL</button>
+</div>
+
+<div class="card">
+<div style="color:#888;font-size:12px">ID: IF000004 • <span id="mode">OFFLINE</span></div>
+<div class="saldo" id="saldo">Rp ...</div>
+</div>
+
+<div class="card">
+<h3>Topup</h3>
+<div class="grid">
+<button class="item" onclick="topup(10000)">+10rb</button>
+<button class="item" onclick="topup(50000)">+50rb</button>
+<button class="item" onclick="topup(100000)">+100rb</button>
+<button class="item" onclick="resetSaldo()">Reset 0</button>
+</div>
+</div>
+
+<div class="card">
+<h3>Beli</h3>
+<div class="grid">
+<button class="item" onclick="beli(6500,'Tsel 5rb')">Tsel 5rb<br><small>Rp 6.500</small></button>
+<button class="item" onclick="beli(12000,'Tsel 10rb')">Tsel 10rb<br><small>Rp 12.000</small></button>
+<button class="item" onclick="beli(21000,'XL 20rb')">XL 20rb<br><small>Rp 21.000</small></button>
+<button class="item" onclick="beli(55000,'PLN 50rb')">PLN 50rb<br><small>Rp 55.000</small></button>
+</div>
+<div id="log" style="margin-top:12px;color:#00ff88;font-size:12px"></div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const URL = 'https://uodyquxmujmgiwfatkeh.supabase.co';
+let KEY = localStorage.getItem('sb_publishable_key') || '';
+const USER_ID = 'IF000004';
+const statusEl = document.getElementById('status');
+const keyBox = document.getElementById('keyBox');
+const saldoEl = document.getElementById('saldo');
+const modeEl = document.getElementById('mode');
+function checkKey(){
+  if(!KEY || !KEY.startsWith('sb_publishable_')){
+    statusEl.innerText = 'Butuh Publishable Key';
+    keyBox.style.display='block';
+    modeEl.innerText='OFFLINE - No Key';
+    let s = parseInt(localStorage.getItem('offline_saldo_'+USER_ID) || '3500');
+    saldoEl.innerText='Rp '+s.toLocaleString('id-ID');
+    return false;
+  }
+  keyBox.style.display='none';
+  return true;
+}
+window.saveKey = ()=>{
+  const v = document.getElementById('keyInput').value.trim();
+  if(!v.startsWith('sb_publishable_')){alert('Key harus sb_publishable_');return}
+  localStorage.setItem('sb_publishable_key', v);
+  KEY = v;
+  location.reload();
+}
+let supabase = null;
+let REAL = false;
+async function init(){
+  if(!checkKey()) return;
+  supabase = createClient(URL, KEY);
+  statusEl.innerText='Menghubungkan...';
   try{
-    let r=await fetch(SUPA_URL,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}})
-    if(!r.ok) throw 'http '+r.status
-    let j=await r.json()
-    if(j.length>0){
-      document.getElementById('saldo').innerText='Rp '+(j[0].saldo||0).toLocaleString('id-ID')
-      localStorage.setItem('saldo_IF000004', j[0].saldo)
-      document.getElementById('mode').innerText='Mode: REAL Supabase ✅'
-      document.getElementById('info').innerText='Supabase OK: '+j[0].id
-      return
-    }else{
-      document.getElementById('mode').innerText='Mode: REAL tapi user belum ada (insert dulu di SQL)'
-      document.getElementById('info').innerText='Jalankan: INSERT INTO users (id,saldo) VALUES (IF000004,0)'
+    const { data, error } = await supabase.from('users').select('saldo').eq('id', USER_ID).maybeSingle();
+    if(error) throw error;
+    if(!data){
+      await supabase.from('users').insert({id:USER_ID, saldo:3500});
+      saldoEl.innerText='Rp 3.500';
+    } else {
+      saldoEl.innerText='Rp '+Number(data.saldo).toLocaleString('id-ID');
     }
-  }catch(e){
-    document.getElementById('mode').innerText='Mode: OFFLINE (Supabase gagal: '+e+')'
-    document.getElementById('info').innerText='Saldo dari HP dulu, Supabase nanti. Tapi tetap jalan!'
-    useSupa=false
+    REAL = true;
+    statusEl.innerText='REAL Supabase ✅';
+    statusEl.className='badge ok';
+    modeEl.innerText='REAL Supabase ✅';
+  }catch(err){
+    statusEl.innerText='Failed: '+err.message;
+    statusEl.className='badge bad';
   }
 }
-async function topup(){
-  let nom=parseInt(document.getElementById('nom').value)
-  let cur=parseInt(localStorage.getItem('saldo_IF000004')||'0')
-  let next=cur+nom
-  localStorage.setItem('saldo_IF000004', next)
-  document.getElementById('saldo').innerText='Rp '+next.toLocaleString('id-ID')
-  if(useSupa){
-    try{await fetch('https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004',{method:'PATCH',headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({saldo:next})})}catch{}
-  }
-  alert('Topup '+nom+' sukses! Saldo: '+next)
+window.topup = async(n)=>{
+  if(!REAL){let cur=parseInt(localStorage.getItem('offline_saldo_'+USER_ID)||'3500');cur+=n;localStorage.setItem('offline_saldo_'+USER_ID,cur);saldoEl.innerText='Rp '+cur.toLocaleString('id-ID');return;}
+  const { data } = await supabase.from('users').select('saldo').eq('id',USER_ID).single();
+  const baru = Number(data.saldo)+n;
+  await supabase.from('users').update({saldo:baru}).eq('id',USER_ID);
+  saldoEl.innerText='Rp '+baru.toLocaleString('id-ID');
 }
-function beli(){
-  let cur=parseInt(localStorage.getItem('saldo_IF000004')||'0')
-  if(cur<6500){alert('Saldo kurang');return}
-  let next=cur-6500
-  localStorage.setItem('saldo_IF000004', next)
-  document.getElementById('saldo').innerText='Rp '+next.toLocaleString('id-ID')
-  alert('Beli sukses!')
+window.beli = async(harga,nama)=>{
+  const curData = REAL ? (await supabase.from('users').select('saldo').eq('id',USER_ID).single()).data : {saldo: parseInt(localStorage.getItem('offline_saldo_'+USER_ID)||'3500')};
+  if(Number(curData.saldo)<harga){alert('Saldo kurang');return}
+  if(!REAL){let cur=Number(curData.saldo)-harga;localStorage.setItem('offline_saldo_'+USER_ID,cur);saldoEl.innerText='Rp '+cur.toLocaleString('id-ID');return;}
+  const baru = Number(curData.saldo)-harga;
+  await supabase.from('users').update({saldo:baru}).eq('id',USER_ID);
+  saldoEl.innerText='Rp '+baru.toLocaleString('id-ID');
 }
-load()
-</script></body></html>
+window.resetSaldo = async()=>{
+  if(!REAL){localStorage.setItem('offline_saldo_'+USER_ID,'0');saldoEl.innerText='Rp 0';return;}
+  await supabase.from('users').update({saldo:0}).eq('id',USER_ID);
+  saldoEl.innerText='Rp 0';
+}
+init();
+</script>
+</body>
+  </html>
