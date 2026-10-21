@@ -1,133 +1,255 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>All in One Pay - REAL</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Isi Pulsa - BLUE REAL Supabase</title>
+<meta name="theme-color" content="#0a84ff" />
+<link rel="icon" type="image/png" href="./icon-192.png" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="stylesheet" href="./style.css" />
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0a;color:#fff;font-family:system-ui;padding:16px}
-.card{background:#161616;border:1px solid #2a2a2a;border-radius:16px;padding:16px;margin-bottom:16px}
-.saldo{font-size:32px;font-weight:800;color:#00ff88}
-.btn{padding:12px 18px;border-radius:12px;border:0;font-weight:700;cursor:pointer}
-.btn-green{background:#00ff88;color:#000}
-input{width:100%;padding:14px;border-radius:12px;background:#0f0f0f;border:1px solid #333;color:#fff;margin:8px 0}
-.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
-.ok{background:#00ff88;color:#000} .bad{background:#ff3b3b;color:#fff}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.item{background:#1e1e1e;border:1px solid #333;border-radius:12px;padding:12px;text-align:left;cursor:pointer}
+@keyframes pulse-glow{0%,100%{opacity:.9;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
+.badge-promo{animation:pulse-glow 2s infinite}
+.tab-content{display:none}.tab-content.active{display:block;animation:fadeIn .2s ease-in}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+/* BLUE OVERRIDE */
+:root{--primary:#0a84ff !important}
+.wallet-card{background:linear-gradient(135deg,#10244a,#1c3d75) !important;border:1px solid #2a5aa0 !important}
+.quick-icon-wrap{background:rgba(10,132,255,.15) !important}
+#wallet-balance-display{color:#fff;text-shadow:0 0 15px #0a84ff88}
 </style>
 </head>
 <body>
-<h2>💳 All in One Pay - REAL</h2>
-<div id="status" class="badge bad" style="margin:8px 0">Checking...</div>
+<div id="app-container">
+<header class="app-header">
+<div class="header-top">
+<div class="brand-info">
+<img src="./icon-192.png" class="brand-logo-img" />
+<div>
+<div class="user-meta-row"><span class="user-id-badge">IF000004</span><span class="member-chip" id="supa-status" style="background:#0a84ff;color:#fff">REAL ✅</span></div>
+<div class="points-pill">0 Poin <span id="header-points"></span></div>
+</div>
+</div>
+<div class="header-actions">
+<button class="icon-btn" id="btn-theme-toggle">☀️</button>
+<button class="icon-btn" id="btn-chat">💬</button>
+<button class="icon-btn" id="btn-notification">🔔</button>
+</div>
+</div>
+<div class="search-bar-wrap"><input type="text" id="service-search-input" class="search-input" placeholder="Cari pulsa, paket data, PLN, game..." /></div>
+</header>
 
-<div id="keyBox" class="card" style="display:none">
-<h3>🔑 Masukkan Publishable Key</h3>
-<p style="color:#888;font-size:13px">Supabase > Project Settings > Data API > Copy Publishable Key (sb_publishable_...)</p>
-<input id="keyInput" placeholder="sb_publishable_...">
-<button class="btn btn-green" style="width:100%" onclick="saveKey()">Simpan & Jadi REAL</button>
+<div class="pwa-banner" id="pwa-install-banner">
+<div class="pwa-banner-left"><img src="./icon-512.png" class="pwa-thumb" /><div><h4>Isi Pulsa App</h4><p>BLUE REAL Supabase 💙</p></div></div>
+<button class="btn-pwa-install" id="btn-install-pwa">Install PWA</button>
 </div>
 
-<div class="card">
-<div style="color:#888;font-size:12px">ID: IF000004 • <span id="mode">OFFLINE</span></div>
-<div class="saldo" id="saldo">Rp ...</div>
+<main id="tab-beranda" class="tab-content active">
+<section class="wallet-card">
+<div class="wallet-balance-row">
+<div>
+<div class="balance-label"><span>Saldo Utama</span><button id="toggle-balance-eye" style="background:none;border:none;color:#fff">👁️</button></div>
+<div class="balance-amount" id="wallet-balance-display">Rp ...</div>
 </div>
+<div class="bonus-box"><div class="bonus-label">Bonus Saldo</div><div class="bonus-amount" id="wallet-bonus-display">Rp 1.525.000</div></div>
+</div>
+<div class="wallet-actions">
+<button class="wallet-act-btn" id="act-topup"><span>Isi Saldo</span></button>
+<button class="wallet-act-btn" id="act-mutation"><span>Mutasi</span></button>
+<button class="wallet-act-btn" id="act-transfer"><span>Transfer</span></button>
+</div>
+</section>
 
-<div class="card">
-<h3>Topup</h3>
-<div class="grid">
-<button class="item" onclick="topup(10000)">+10rb</button>
-<button class="item" onclick="topup(50000)">+50rb</button>
-<button class="item" onclick="topup(100000)">+100rb</button>
-<button class="item" onclick="resetSaldo()">Reset 0</button>
-</div>
-</div>
+<section><div class="section-header"><h2 class="section-title">Akses Cepat</h2></div><div class="quick-access-grid" id="quick-access-container"></div></section>
+<section><div class="section-header"><h2 class="section-title">Category</h2></div><div class="category-grid" id="category-grid-container"></div></section>
+</main>
 
-<div class="card">
-<h3>Beli</h3>
-<div class="grid">
-<button class="item" onclick="beli(6500,'Tsel 5rb')">Tsel 5rb<br><small>Rp 6.500</small></button>
-<button class="item" onclick="beli(12000,'Tsel 10rb')">Tsel 10rb<br><small>Rp 12.000</small></button>
-<button class="item" onclick="beli(21000,'XL 20rb')">XL 20rb<br><small>Rp 21.000</small></button>
-<button class="item" onclick="beli(55000,'PLN 50rb')">PLN 50rb<br><small>Rp 55.000</small></button>
-</div>
-<div id="log" style="margin-top:12px;color:#00ff88;font-size:12px"></div>
+<section id="tab-riwayat" class="tab-content" style="padding:16px"><h2>Riwayat Transaksi</h2><div id="history-list-container"></div></section>
+<section id="tab-pelanggan" class="tab-content" style="padding:16px"><h2>Pelanggan</h2><div id="customer-list-container"></div></section>
+<section id="tab-berita" class="tab-content" style="padding:16px"><h2>Berita</h2><div id="news-container"></div></section>
+<section id="tab-member" class="tab-content" style="padding:16px"><h2>Member IF000004</h2><p id="supa-info">Supabase REAL</p></section>
+
+<nav class="bottom-nav" id="bottom-nav-bar">
+<button class="nav-item active" data-tab="tab-beranda"><span>Beranda</span></button>
+<button class="nav-item" data-tab="tab-riwayat"><span>Riwayat</span></button>
+<button class="nav-item" data-tab="tab-pelanggan"><span>Pelanggan</span></button>
+<button class="nav-item" data-tab="tab-berita"><span>Berita</span></button>
+<button class="nav-item" data-tab="tab-member"><span>Member</span></button>
+</nav>
+
+<div class="modal-overlay" id="checkout-modal"><div class="modal-sheet"><h3 id="checkout-title">Beli</h3><input id="checkout-target-number" class="form-input" placeholder="0812..." value="081298765432" /><div id="checkout-nominals-list"></div><select id="checkout-payment-method" class="form-input"><option value="balance">Saldo Utama</option></select><button id="btn-confirm-transaction" class="btn-primary">Bayar REAL</button><button id="close-checkout-modal">Tutup</button></div></div>
+<div class="modal-overlay" id="topup-modal"><div class="modal-sheet"><h3>Isi Saldo</h3><div id="topup-nominals"><button class="nominal-btn selected" data-amt="50000">Rp 50.000</button><button class="nominal-btn" data-amt="100000">Rp 100.000</button><button class="nominal-btn" data-amt="250000">Rp 250.000</button><button class="nominal-btn" data-amt="500000">Rp 500.000</button></div><button id="btn-submit-topup" class="btn-primary">Isi Saldo REAL</button><button id="close-topup-modal">Tutup</button></div></div>
+<div class="modal-overlay" id="transfer-modal"><div class="modal-sheet"><h3>Transfer</h3><input id="transfer-target-id" placeholder="IF000088" class="form-input" /><input id="transfer-amount" type="number" value="50000" class="form-input" /><button id="btn-submit-transfer" class="btn-primary">Kirim REAL</button><button id="close-transfer-modal">Tutup</button></div></div>
+<div class="toast-msg" id="app-toast"><span id="toast-text">Berhasil!</span></div>
 </div>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-const URL = 'https://uodyquxmujmgiwfatkeh.supabase.co';
-let KEY = localStorage.getItem('sb_publishable_key') || '';
+
+// --- SUPABASE REAL ---
+const SUPA_URL = 'https://uodyquxmujmgiwfatkeh.supabase.co';
+let SUPA_KEY = localStorage.getItem('sb_publishable_key');
+if(!SUPA_KEY){
+  let k = prompt('Paste Publishable Key sb_publishable_... (sekali aja dari Supabase Data API)');
+  if(k){ localStorage.setItem('sb_publishable_key', k); SUPA_KEY=k; }
+}
 const USER_ID = 'IF000004';
-const statusEl = document.getElementById('status');
-const keyBox = document.getElementById('keyBox');
-const saldoEl = document.getElementById('saldo');
-const modeEl = document.getElementById('mode');
-function checkKey(){
-  if(!KEY || !KEY.startsWith('sb_publishable_')){
-    statusEl.innerText = 'Butuh Publishable Key';
-    keyBox.style.display='block';
-    modeEl.innerText='OFFLINE - No Key';
-    let s = parseInt(localStorage.getItem('offline_saldo_'+USER_ID) || '3500');
-    saldoEl.innerText='Rp '+s.toLocaleString('id-ID');
-    return false;
+const supabase = createClient(SUPA_URL, SUPA_KEY);
+
+// --- DATA ASLI LU ---
+const APP_DATA = {
+  wallet:{balance:10069069,bonus:1525000},
+  quick_access:[
+    {id:"pulsa",name:"Pulsa",icon:"phone",color:"#0a84ff"},
+    {id:"telkomsel_promo",name:"Telkomsel",badge:"Promo",icon:"flame",color:"#E82A2A"},
+    {id:"token_pln",name:"Token PLN",icon:"zap",color:"#FFB800"},
+    {id:"pln_tagihan",name:"PLN Tagihan",icon:"receipt",color:"#00C2FF"}
+  ],
+  categories:{
+    items:[
+      {id:"promo",name:"*Promo",icon:"tag",color:"#FF4757"},
+      {id:"isi_ulang",name:"Isi Ulang",icon:"smartphone",color:"#0a84ff"},
+      {id:"aktivasi_paket",name:"Aktivasi Paket Perdana & Voc. Kosong",icon:"sim-card",color:"#2ED573"},
+      {id:"voucher_tv",name:"Voucher TV",icon:"tv",color:"#FFA502"},
+      {id:"topup_games",name:"Topup Games",icon:"gamepad-2",color:"#9B59B6"},
+      {id:"token",name:"Token",icon:"bolt",color:"#ECCC68"},
+      {id:"tagihan",name:"Tagihan",icon:"file-text",color:"#70A1FF"},
+      {id:"pdam",name:"PDAM",icon:"droplet",color:"#1E90FF"},
+      {id:"bpjs",name:"BPJS",icon:"shield",color:"#2ED573"},
+      {id:"ewallet",name:"E-Wallet",icon:"wallet",color:"#FF6348"},
+      {id:"voucher_lain",name:"Voucher Lain",icon:"gift",color:"#FD79A8"},
+      {id:"lainnya",name:"Lainnya",icon:"grid",color:"#A4B0BE"}
+    ]
   }
-  keyBox.style.display='none';
-  return true;
-}
-window.saveKey = ()=>{
-  const v = document.getElementById('keyInput').value.trim();
-  if(!v.startsWith('sb_publishable_')){alert('Key harus sb_publishable_');return}
-  localStorage.setItem('sb_publishable_key', v);
-  KEY = v;
-  location.reload();
-}
-let supabase = null;
-let REAL = false;
-async function init(){
-  if(!checkKey()) return;
-  supabase = createClient(URL, KEY);
-  statusEl.innerText='Menghubungkan...';
+};
+
+let userBalance = 0;
+let isBalanceHidden=false;
+let activeService=null;
+let selectedNominal=null;
+let transactionLogs=[];
+
+function formatRupiah(n){return "Rp "+Number(n).toLocaleString("id-ID");}
+function showToast(msg){const t=document.getElementById("app-toast");document.getElementById("toast-text").textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+function getSvgIcon(){return "📱";}
+
+async function loadSaldoREAL(){
   try{
-    const { data, error } = await supabase.from('users').select('saldo').eq('id', USER_ID).maybeSingle();
+    let {data,error} = await supabase.from('users').select('saldo').eq('id',USER_ID).maybeSingle();
     if(error) throw error;
-    if(!data){
-      await supabase.from('users').insert({id:USER_ID, saldo:3500});
-      saldoEl.innerText='Rp 3.500';
-    } else {
-      saldoEl.innerText='Rp '+Number(data.saldo).toLocaleString('id-ID');
+    if(!data){ await supabase.from('users').insert({id:USER_ID,saldo:10069069}); data={saldo:10069069}; }
+    userBalance=Number(data.saldo);
+    document.getElementById('wallet-balance-display').textContent=formatRupiah(userBalance);
+    document.getElementById('supa-status').textContent='REAL ✅ Rp '+userBalance.toLocaleString('id-ID');
+    document.getElementById('supa-status').style.background='#00c853';
+    // load transaksi
+    let {data:trx} = await supabase.from('transaksi').select('*').eq('user_id',USER_ID).order('created_at',{ascending:false}).limit(20);
+    if(trx && trx.length>0){
+      transactionLogs=trx.map(x=>({title:x.keterangan,desc:x.jenis,amount:x.jumlah,date:new Date(x.created_at).toLocaleString(),type:x.jumlah>0?'plus':'minus'}));
+      renderHistory();
     }
-    REAL = true;
-    statusEl.innerText='REAL Supabase ✅';
-    statusEl.className='badge ok';
-    modeEl.innerText='REAL Supabase ✅';
-  }catch(err){
-    statusEl.innerText='Failed: '+err.message;
-    statusEl.className='badge bad';
+    showToast('REAL Supabase Connected 💙 Rp '+userBalance.toLocaleString('id-ID'));
+  }catch(e){
+    document.getElementById('wallet-balance-display').textContent='Error: '+e.message;
+    document.getElementById('supa-status').textContent='OFFLINE';
+    showToast('Error: '+e.message);
   }
 }
-window.topup = async(n)=>{
-  if(!REAL){let cur=parseInt(localStorage.getItem('offline_saldo_'+USER_ID)||'3500');cur+=n;localStorage.setItem('offline_saldo_'+USER_ID,cur);saldoEl.innerText='Rp '+cur.toLocaleString('id-ID');return;}
-  const { data } = await supabase.from('users').select('saldo').eq('id',USER_ID).single();
-  const baru = Number(data.saldo)+n;
+
+function renderQuickAccess(){
+  const c=document.getElementById("quick-access-container"); c.innerHTML="";
+  APP_DATA.quick_access.forEach(item=>{
+    const card=document.createElement("div"); card.className="quick-card"; card.style.cssText="background:#0f2342;border:1px solid #1a3a6a;border-radius:16px;padding:14px;text-align:center;cursor:pointer";
+    card.innerHTML=`${item.badge?`<span style="background:#0a84ff;color:#fff;padding:2px 6px;border-radius:10px;font-size:10px">${item.badge}</span>`:''}<div style="font-size:22px;color:${item.color}">●</div><span>${item.name}</span>`;
+    card.onclick=()=>openCheckoutModal(item.name,item.id);
+    c.appendChild(card);
+  });
+}
+function renderCategories(){
+  const c=document.getElementById("category-grid-container"); c.innerHTML="";
+  APP_DATA.categories.items.forEach(item=>{
+    const cat=document.createElement("div"); cat.className="category-item"; cat.style.cssText="background:#0f2342;border:1px solid #1a3a6a;border-radius:16px;padding:12px;text-align:center;cursor:pointer";
+    cat.innerHTML=`<div style="color:${item.color};font-size:20px">●</div><span style="font-size:11px">${item.name}</span>`;
+    cat.onclick=()=>openCheckoutModal(item.name,item.id);
+    c.appendChild(cat);
+  });
+}
+function renderHistory(){
+  const container=document.getElementById("history-list-container"); container.innerHTML="";
+  transactionLogs.forEach(item=>{
+    const row=document.createElement("div"); row.style.cssText="background:#0f2342;border:1px solid #1a3a6a;border-radius:12px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between";
+    row.innerHTML=`<div><b>${item.title}</b><div style="font-size:11px;color:#7fb3ff">${item.desc}</div></div><div style="color:${item.type==='plus'?'#00ff88':'#ff4444'}">${formatRupiah(item.amount)}</div>`;
+    container.appendChild(row);
+  });
+}
+function openCheckoutModal(name,id){
+  activeService={name,id};
+  document.getElementById("checkout-title").textContent="Transaksi: "+name;
+  const list=document.getElementById("checkout-nominals-list"); list.innerHTML="";
+  let nominals=[];
+  if(id.includes("pln")||id.includes("token")) nominals=[{val:"PLN 20K",price:21500},{val:"PLN 50K",price:51500},{val:"PLN 100K",price:101500}];
+  else if(id.includes("games")) nominals=[{val:"86 Diamonds",price:21000},{val:"172 Diamonds",price:42000}];
+  else nominals=[{val:"Pulsa 10K",price:10800},{val:"Pulsa 25K",price:25400},{val:"Pulsa 50K",price:50200},{val:"Pulsa 100K",price:99800}];
+  selectedNominal=nominals[0];
+  nominals.forEach((it,i)=>{
+    const btn=document.createElement("button"); btn.className="nominal-btn"+(i===0?" selected":""); btn.style.cssText="background:#132a52;border:1px solid #2a5aa0;color:#fff;padding:10px;border-radius:10px;margin:4px;width:100%";
+    btn.innerHTML=`${it.val} - ${formatRupiah(it.price)}`;
+    btn.onclick=()=>{document.querySelectorAll("#checkout-nominals-list .nominal-btn").forEach(b=>b.classList.remove("selected"));btn.classList.add("selected");selectedNominal=it;};
+    list.appendChild(btn);
+  });
+  document.getElementById("checkout-modal").classList.add("active");
+}
+function switchTab(id){
+  document.querySelectorAll(".tab-content").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(b=>b.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelector(`[data-tab='${id}']`).classList.add("active");
+}
+document.querySelectorAll(".nav-item").forEach(btn=>btn.addEventListener("click",()=>switchTab(btn.dataset.tab)));
+document.getElementById("act-topup").onclick=()=>document.getElementById("topup-modal").classList.add("active");
+document.getElementById("act-mutation").onclick=()=>switchTab("tab-riwayat");
+document.getElementById("act-transfer").onclick=()=>document.getElementById("transfer-modal").classList.add("active");
+document.getElementById("close-topup-modal").onclick=()=>document.getElementById("topup-modal").classList.remove("active");
+document.getElementById("close-transfer-modal").onclick=()=>document.getElementById("transfer-modal").classList.remove("active");
+document.getElementById("close-checkout-modal").onclick=()=>document.getElementById("checkout-modal").classList.remove("active");
+
+document.getElementById("btn-submit-topup").onclick=async()=>{
+  const amt=parseInt(document.querySelector("#topup-nominals .nominal-btn.selected").dataset.amt)||50000;
+  const baru=userBalance+amt;
   await supabase.from('users').update({saldo:baru}).eq('id',USER_ID);
-  saldoEl.innerText='Rp '+baru.toLocaleString('id-ID');
-}
-window.beli = async(harga,nama)=>{
-  const curData = REAL ? (await supabase.from('users').select('saldo').eq('id',USER_ID).single()).data : {saldo: parseInt(localStorage.getItem('offline_saldo_'+USER_ID)||'3500')};
-  if(Number(curData.saldo)<harga){alert('Saldo kurang');return}
-  if(!REAL){let cur=Number(curData.saldo)-harga;localStorage.setItem('offline_saldo_'+USER_ID,cur);saldoEl.innerText='Rp '+cur.toLocaleString('id-ID');return;}
-  const baru = Number(curData.saldo)-harga;
+  await supabase.from('transaksi').insert({user_id:USER_ID,jenis:'topup',jumlah:amt,keterangan:'Isi Saldo '+amt});
+  userBalance=baru;
+  document.getElementById('wallet-balance-display').textContent=formatRupiah(baru);
+  document.getElementById("topup-modal").classList.remove("active");
+  showToast('Topup REAL +'+formatRupiah(amt)+' ✅'); loadSaldoREAL();
+};
+document.getElementById("btn-confirm-transaction").onclick=async()=>{
+  const cost=selectedNominal.price;
+  if(userBalance<cost){showToast('Saldo kurang!');return;}
+  const baru=userBalance-cost;
   await supabase.from('users').update({saldo:baru}).eq('id',USER_ID);
-  saldoEl.innerText='Rp '+baru.toLocaleString('id-ID');
-}
-window.resetSaldo = async()=>{
-  if(!REAL){localStorage.setItem('offline_saldo_'+USER_ID,'0');saldoEl.innerText='Rp 0';return;}
-  await supabase.from('users').update({saldo:0}).eq('id',USER_ID);
-  saldoEl.innerText='Rp 0';
-}
-init();
+  await supabase.from('transaksi').insert({user_id:USER_ID,jenis:'beli',jumlah:-cost,keterangan:activeService.name+' '+selectedNominal.val});
+  userBalance=baru;
+  document.getElementById('wallet-balance-display').textContent=formatRupiah(baru);
+  document.getElementById("checkout-modal").classList.remove("active");
+  showToast(activeService.name+' Sukses -'+formatRupiah(cost)+' ✅'); loadSaldoREAL();
+};
+document.getElementById("btn-submit-transfer").onclick=async()=>{
+  const amt=parseInt(document.getElementById("transfer-amount").value);
+  if(userBalance<amt){showToast('Saldo kurang');return;}
+  const baru=userBalance-amt;
+  await supabase.from('users').update({saldo:baru}).eq('id',USER_ID);
+  await supabase.from('transaksi').insert({user_id:USER_ID,jenis:'transfer',jumlah:-amt,keterangan:'Transfer ke '+document.getElementById("transfer-target-id").value});
+  userBalance=baru;
+  document.getElementById('wallet-balance-display').textContent=formatRupiah(baru);
+  document.getElementById("transfer-modal").classList.remove("active");
+  showToast('Transfer REAL '+formatRupiah(amt)+' ✅'); loadSaldoREAL();
+};
+
+// START
+renderQuickAccess(); renderCategories(); loadSaldoREAL();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
 </script>
 </body>
   </html>
