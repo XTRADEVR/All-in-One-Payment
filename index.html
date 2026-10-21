@@ -1,26 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>PulsaKu REAL FIX</title><style>body{font-family:sans-serif;background:#f5f5f5;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:12px;padding:14px;border-radius:12px}.saldo{font-size:28px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px;font-weight:bold}</style></head>
-<body>
-<div class="header"><h2>⚡ PulsaKu REAL FIX</h2><p>IF000004 - Key OK</p></div>
-<div class="card"><p>Saldo Real</p><div class="saldo" id="saldo">Loading...</div><button class="btn" onclick="loadSaldo()">Refresh</button><div id="log"></div></div>
-<div class="card"><select id="nominal"><option value="10000">10rb</option><option value="50000">50rb</option><option value="100000">100rb</option></select><button class="btn" onclick="topup()">+ Tambah Saldo</button></div>
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
-const supabase = createClient('https://uodyqxumjmgjwfatkvtxu.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvZHlxdXhtdWptZ2l3ZmF0a2V0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkyNTU0NzY1LCJleHAiOjIxMDgxMzA3NjV9.FDewhDPeeeoXbt-YqYLZ-16BYB_LEEix8GGF_DJNLD8')
-const UID='IF000004'
-window.loadSaldo=async()=>{
- const {data,error}=await supabase.from('users').select('*').eq('id',UID).single()
- if(error){document.getElementById('log').innerText='ERR:'+error.message;return}
- document.getElementById('saldo').innerText='Rp '+(data.saldo||0).toLocaleString()
- document.getElementById('log').innerText='OK:'+JSON.stringify(data)
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>REAL FIX 2</title><style>body{font-family:sans-serif;background:#eee;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:10px;padding:12px;border-radius:10px}.saldo{font-size:26px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px}</style></head><body>
+<div class="header"><h2>⚡ REAL FIX V2 (FETCH)</h2><p id="status">Connecting...</p></div>
+<div class="card"><div class="saldo" id="saldo">Loading...</div><pre id="log" style="font-size:10px;white-space:pre-wrap"></pre><button class="btn" onclick="load()">Refresh</button></div>
+<div class="card"><select id="nom"><option value="10000">10rb</option><option value="100000">100rb</option></select><button class="btn" onclick="topup()">+ Tambah</button></div>
+<script>
+const URL='https://uodyqxumjmgjwfatkvtxu.supabase.co/rest/v1/users?id=eq.IF000004'
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvZHlxdXhtdWptZ2l3ZmF0a2V0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkyNTU0NzY1LCJleHAiOjIxMDgxMzA3NjV9.FDewhDPeeeoXbt-YqYLZ-16BYB_LEEix8GGF_DJNLD8'
+async function load(){
+ document.getElementById('status').innerText='Loading API...'
+ try{
+  let r=await fetch(URL,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
+  let j=await r.json()
+  document.getElementById('log').innerText='RESP:'+JSON.stringify(j).substring(0,500)+'\nSTATUS:'+r.status
+  if(j.length==0){document.getElementById('saldo').innerText='USER TIDAK ADA - INSERT DULU';return}
+  document.getElementById('saldo').innerText='Rp '+(j[0].saldo||0).toLocaleString()
+  document.getElementById('status').innerText='CONNECTED OK'
+ }catch(e){document.getElementById('log').innerText='FETCH ERR:'+e}
 }
-window.topup=async()=>{
- const nom=parseInt(document.getElementById('nominal').value)
- const {data}=await supabase.from('users').select('saldo').eq('id',UID).single()
- await supabase.from('users').update({saldo:(data.saldo||0)+nom}).eq('id',UID)
- alert('OK Topup '+nom);loadSaldo()
+async function topup(){
+ let nom=parseInt(document.getElementById('nom').value)
+ let r=await fetch(URL,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
+ let j=await r.json()
+ let saldo=(j[0]?.saldo||0)+nom
+ await fetch('https://uodyqxumjmgjwfatkvtxu.supabase.co/rest/v1/users?id=eq.IF000004',{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({saldo:saldo})})
+ alert('Topup OK jadi '+saldo);load()
 }
-loadSaldo()
-</script>
-</body></html>
+load()
+</script></body></html>
