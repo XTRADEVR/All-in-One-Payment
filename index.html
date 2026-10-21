@@ -1,1 +1,26 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>PulsaKu REAL</title><link rel="manifest" href="manifest.json"><style>body{font-family:sans-serif;background:#f5f5f5;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:12px;padding:14px;border-radius:12px}.saldo{font-size:26px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px;font-weight:bold}</style></head><body><div class="header"><h2>⚡ PulsaKu REAL</h2><p>IF000004 | Supabase ON</p></div><div class="card"><p>Saldo Real</p><div class="saldo" id="saldo">Loading...</div><button class="btn" onclick="loadSaldo()">Refresh</button></div><div class="card"><h3>Topup Real</h3><select id="nominal"><option value="10000">10rb</option><option value="50000">50rb</option><option value="100000">100rb</option></select><button class="btn" onclick="topup()">+ Tambah Saldo</button></div><script type="module">import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';const supabase=createClient('https://uodyqxumjmgjwfatkvtxu.supabase.co','sb_publishable_c2i1n4A_D1HQELfQUDxh9Q_WjkC');const UID='IF000004';window.loadSaldo=async()=>{const{data}=await supabase.from('users').select('*').eq('id',UID).single();document.getElementById('saldo').innerText='Rp '+(data.saldo||0).toLocaleString('id-ID')};window.topup=async()=>{const nom=parseInt(document.getElementById('nominal').value);const{data}=await supabase.from('users').select('saldo').eq('id',UID).single();await supabase.from('users').update({saldo:(data.saldo||0)+nom}).eq('id',UID);alert('OK');loadSaldo()};loadSaldo()</script></body></html>
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>PulsaKu REAL FIX</title><style>body{font-family:sans-serif;background:#f5f5f5;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:12px;padding:14px;border-radius:12px}.saldo{font-size:28px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px;font-weight:bold}</style></head>
+<body>
+<div class="header"><h2>⚡ PulsaKu REAL FIX</h2><p>IF000004 - Key OK</p></div>
+<div class="card"><p>Saldo Real</p><div class="saldo" id="saldo">Loading...</div><button class="btn" onclick="loadSaldo()">Refresh</button><div id="log"></div></div>
+<div class="card"><select id="nominal"><option value="10000">10rb</option><option value="50000">50rb</option><option value="100000">100rb</option></select><button class="btn" onclick="topup()">+ Tambah Saldo</button></div>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+const supabase = createClient('https://uodyqxumjmgjwfatkvtxu.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvZHlxdXhtdWptZ2l3ZmF0a2V0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkyNTU0NzY1LCJleHAiOjIxMDgxMzA3NjV9.FDewhDPeeeoXbt-YqYLZ-16BYB_LEEix8GGF_DJNLD8')
+const UID='IF000004'
+window.loadSaldo=async()=>{
+ const {data,error}=await supabase.from('users').select('*').eq('id',UID).single()
+ if(error){document.getElementById('log').innerText='ERR:'+error.message;return}
+ document.getElementById('saldo').innerText='Rp '+(data.saldo||0).toLocaleString()
+ document.getElementById('log').innerText='OK:'+JSON.stringify(data)
+}
+window.topup=async()=>{
+ const nom=parseInt(document.getElementById('nominal').value)
+ const {data}=await supabase.from('users').select('saldo').eq('id',UID).single()
+ await supabase.from('users').update({saldo:(data.saldo||0)+nom}).eq('id',UID)
+ alert('OK Topup '+nom);loadSaldo()
+}
+loadSaldo()
+</script>
+</body></html>
