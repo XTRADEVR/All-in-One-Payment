@@ -1,27 +1,7 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>REAL FINAL</title><style>body{font-family:sans-serif;background:#eee;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:10px;padding:12px;border-radius:10px}.saldo{font-size:28px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px}</style></head><body>
-<div class="header"><h2>⚡ REAL FINAL FIX</h2><p id="st">Connecting...</p></div>
-<div class="card"><div class="saldo" id="saldo">Loading...</div><pre id="log" style="font-size:10px;white-space:pre-wrap"></pre><button class="btn" onclick="load()">Refresh</button></div>
-<div class="card"><select id="nom"><option value="10000">10rb</option><option value="100000">100rb</option></select><button class="btn" onclick="topup()">+ Tambah</button></div>
-<script>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FINAL</title><style>body{font-family:sans-serif;background:#eee;margin:0}.header{background:#EC2028;color:#fff;padding:20px;text-align:center}.card{background:#fff;margin:10px;padding:12px;border-radius:10px}.saldo{font-size:28px;font-weight:bold;color:#EC2028}.btn{background:#EC2028;color:#fff;border:none;padding:12px;width:100%;border-radius:8px}</style></head><body><div class="header"><h2>⚡ FINAL REAL</h2><p id="st">Load...</p></div><div class="card"><div class="saldo" id="saldo">Loading...</div><pre id="log" style="font-size:10px"></pre><button class="btn" onclick="load()">Refresh</button></div><div class="card"><button class="btn" onclick="topup()">+ Tambah 10rb</button></div><script>
 const URL='https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004'
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvZHlxdXhtdWptZ2l3ZmF0a2V0eCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzkyNTU0NzY1LCJleHAiOjIxMDgxMzA3NjV9.FDewhDPeeeoXbt-YqYLZ-16BYB_LEEix8GGF_DJNLD8'
-async function load(){
- try{
-  let r=await fetch(URL,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
-  let j=await r.json()
-  document.getElementById('log').innerText='STATUS:'+r.status+' DATA:'+JSON.stringify(j).slice(0,300)
-  if(j.length==0){document.getElementById('saldo').innerText='USER KOSONG - JALANKAN SQL INSERT!';document.getElementById('st').innerText='NEED INSERT';return}
-  document.getElementById('saldo').innerText='Rp '+(j[0].saldo||0).toLocaleString()
-  document.getElementById('st').innerText='REAL CONNECTED ✅'
- }catch(e){document.getElementById('log').innerText='ERR:'+e}
-}
-async function topup(){
- let nom=parseInt(document.getElementById('nom').value)
- let r=await fetch(URL,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}})
- let j=await r.json()
- let saldo=(j[0]?.saldo||0)+nom
- await fetch('https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004',{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({saldo:saldo})})
- alert('OK jadi '+saldo);load()
-}
+async function load(){try{let r=await fetch(URL,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});let j=await r.json();document.getElementById('log').innerText='OK:'+r.status+' '+JSON.stringify(j);if(j.length==0){document.getElementById('saldo').innerText='TABEL KOSONG!';return}document.getElementById('saldo').innerText='Rp '+(j[0].saldo||0);document.getElementById('st').innerText='CONNECTED'}catch(e){document.getElementById('log').innerText='ERR:'+e}}
+async function topup(){let r=await fetch(URL,{headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}});let j=await r.json();let s=(j[0]?.saldo||0)+10000;await fetch('https://uodyquxmujmgiwfatketx.supabase.co/rest/v1/users?id=eq.IF000004',{method:'PATCH',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify({saldo:s})});alert('Jadi '+s);load()}
 load()
 </script></body></html>
